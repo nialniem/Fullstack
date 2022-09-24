@@ -27,9 +27,7 @@ const App = () => {
     
     copy[selected] += 1
     setPoint(copy)
-    if(copy[props.selected]>copy[props.Best]){
-      Best = props.selected
-    }
+    
     
   }
  
@@ -37,7 +35,7 @@ const App = () => {
   
   const [selected, setSelected] = useState(0)
 
-  const Best = 2
+  
   
   
   
@@ -52,6 +50,6 @@ const App = () => {
      
     </div>
   )
-}
+} 
 
 export default App
