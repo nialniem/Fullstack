@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import './App.css'
 
 
 
 const Button = (props) => (<button onClick={props.onClick}>{props.text}</button>)
+
+const StatisticLine = ({ text, value }) => (
+  <tr>
+    <td>{text}</td>
+    <td>{value}</td>
+  </tr>
+)
 
 
 const Statistics = ({ good, neutral, bad }) => {
@@ -16,19 +22,22 @@ const Statistics = ({ good, neutral, bad }) => {
   }
 
   const average = (good - bad) / total
-  const positive = Math.round((good / total) * 1000) / 10 // 1 decimal
+  const positive = Math.round((good / total) * 1000) / 10
 
   return (
-    <div>
-      <p>Good: {good}</p>
-      <p>Neutral: {neutral}</p>
-      <p>Bad: {bad}</p>
-      <p>All: {total}</p>
-      <p>Average: {average.toFixed(2)}</p>
-      <p>Positive: {positive}%</p>
-    </div>
+    <table>
+      <tbody>
+        <StatisticLine text="Good" value={good} />
+        <StatisticLine text="Neutral" value={neutral} />
+        <StatisticLine text="Bad" value={bad} />
+        <StatisticLine text="All" value={total} />
+        <StatisticLine text="Average" value={average.toFixed(2)} />
+        <StatisticLine text="Positive" value={`${positive} %`} />
+      </tbody>
+    </table>
   )
 }
+
 
 
 
