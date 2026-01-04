@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import personsService from './services/persons'
+
 import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
@@ -18,38 +20,54 @@ const App = (props) => {
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
+    personsService.getAll().then(initialPersons => {
+      setPersons(initialPersons)
+    })
   }, [])
-  console.log('render', persons.length, 'notes')
+  
+  
 
+  const deletePerson = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personsService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== id))
+        })
+        .catch(error => {
+          alert(`Information of ${name} has already been removed from server`)
+          setPersons(persons.filter(p => p.id !== id))
+        })
+    }
+  }
+  
   const addPerson = (event) => {
     event.preventDefault()
-    const nameExists = persons.some(
-      person => person.name === newName
-    )
   
+    const nameExists = persons.some(p => p.name === newName)
     if (nameExists) {
       alert(`${newName} is already added to phonebook`)
       return
     }
-
+  
     const personObject = {
       name: newName,
-      id: String(persons.length + 1),
-      number: newNumber,
+      number: newNumber
     }
-    console.log("toimii", personObject)
-    setPersons(persons.concat(personObject))
-    setNewName('')
-    setNewNumber('')
-
+  
+    personsService
+      .create(personObject)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
+        setNewName('')
+        setNewNumber('')
+      })
+      .catch(error => {
+        alert('Saving person failed')
+        console.log(error)
+      })
   }
+  
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -83,7 +101,11 @@ const App = (props) => {
       />
 
       <h3>Numbers</h3>
-      <Persons persons={personsToShow} />
+      <Persons
+       persons={personsToShow}
+       deletePerson={deletePerson}
+        />
+      
     </div>
   )
 }
