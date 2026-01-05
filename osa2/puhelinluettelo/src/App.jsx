@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import personsService from './services/persons'
-
-import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
+import './index.css'
 
 
 const App = (props) => {
@@ -18,6 +18,10 @@ const App = (props) => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
+
+
+
 
   useEffect(() => {
     personsService.getAll().then(initialPersons => {
@@ -32,21 +36,70 @@ const App = (props) => {
       personsService
         .remove(id)
         .then(() => {
-          setPersons(persons.filter(p => p.id !== id))
+          setPersons(prev => prev.filter(p => p.id !== id))
+  
+          setNotification({
+            text: `Deleted ${name}`,
+            type: 'success'
+          })
+          setTimeout(() => setNotification(null), 5000)
+          
         })
         .catch(error => {
-          alert(`Information of ${name} has already been removed from server`)
-          setPersons(persons.filter(p => p.id !== id))
+          setNotification({
+            text: `Information of ${name} was already removed from server`,
+            type: 'error'
+          })
+          setTimeout(() => setNotification(null), 5000)
+          
         })
     }
   }
   
+  
   const addPerson = (event) => {
     event.preventDefault()
   
-    const nameExists = persons.some(p => p.name === newName)
-    if (nameExists) {
-      alert(`${newName} is already added to phonebook`)
+    const existingPerson = persons.find(p => p.name === newName)
+  
+    if (existingPerson) {
+      const ok = window.confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?`
+      )
+  
+      if (ok) {
+        const updatedPerson = { ...existingPerson, number: newNumber }
+  
+        personsService
+          .update(existingPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(p =>
+              p.id !== existingPerson.id ? p : returnedPerson
+            ))
+  
+            setNotification({
+              text: `Added ${returnedPerson.name}`,
+              type: 'success'
+            })
+            setTimeout(() => setNotification(null), 5000)
+            
+  
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error => {
+            setNotification({
+              text: `Added ${returnedPerson.name}`,
+              type: 'success'
+            })
+            setTimeout(() => setNotification(null), 5000)
+            
+            
+            setPersons(prev => prev.filter(p => p.id !== existingPerson.id))
+          })
+          
+      }
+  
       return
     }
   
@@ -59,16 +112,29 @@ const App = (props) => {
       .create(personObject)
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))
+  
+        setNotification({
+          text: `Added ${returnedPerson.name}`,
+          type: 'success'
+        })
+        setTimeout(() => setNotification(null), 5000)
+        
+  
         setNewName('')
         setNewNumber('')
       })
       .catch(error => {
-        alert('Saving person failed')
+        setNotification({
+          text: 'your message here',
+          type: 'success'
+        })
+        
+        setTimeout(() => setMessage(null), 5000)
         console.log(error)
       })
   }
   
-
+  
   const handleNameChange = (event) => {
     setNewName(event.target.value)
   }
@@ -88,6 +154,8 @@ const App = (props) => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
+
 
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
 
