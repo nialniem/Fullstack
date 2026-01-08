@@ -3,6 +3,14 @@ const app = express()
 
 app.use(express.json())
 
+const morgan = require('morgan')
+
+morgan.token('body', (request) => JSON.stringify(request.body))
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
+
+
 let persons = [
   {
     id: "1",
@@ -26,6 +34,7 @@ let persons = [
   }
 ]
 
+
 app.get('/api/persons', (request, response) => {
     response.json(persons)
   })
@@ -33,6 +42,7 @@ app.get('/api/persons', (request, response) => {
   app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
     const person = persons.find(person => person.id === id)
+    
     if (person) {
         response.json(person)
       } else {
