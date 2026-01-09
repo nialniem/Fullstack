@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const path = require('path')
 
 app.use(express.json())
 const cors = require('cors')
@@ -53,6 +54,25 @@ app.get('/api/persons', (request, response) => {
         response.status(404).end()
       }
   })
+
+  app.get('/', (req, res) => {
+    res.send(`
+      <h1>Phonebook backend</h1>
+      <ul>
+        <li><a href="/api/persons">/api/persons</a></li>
+        <li><a href="/api/info">/api/info</a></li>
+      </ul>
+    `)
+  })
+  
+      
+    app.use(express.static(path.join(__dirname, 'dist')))
+
+    
+    app.get(/^(?!\/api).*/, (req, res) => {
+      res.sendFile(path.join(__dirname, 'dist', 'index.html'))
+    })
+    
 
   app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id
