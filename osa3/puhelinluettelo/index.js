@@ -93,77 +93,77 @@ app.get('/api/persons/:id', (request, response, next) => {
       }
     })
     .catch(error => next(error))
-    })
+})
 
-  app.get('/', (req, res) => {
-    res.send(`
+app.get('/', (req, res) => {
+  res.send(`
       <h1>Phonebook backend</h1>
       <ul>
         <li><a href="/api/persons">/api/persons</a></li>
         <li><a href="/api/info">/api/info</a></li>
       </ul>
     `)
-  })
-  
-      
-    app.use(express.static(path.join(__dirname, 'dist')))
+})
 
-    
-    app.get(/^(?!\/api).*/, (req, res) => {
-      res.sendFile(path.join(__dirname, 'dist', 'index.html'))
-    })
-    
 
-    app.delete('/api/persons/:id', (request, response, next) => {
-      Person.findByIdAndDelete(request.params.id)
-        .then(() => response.status(204).end())
-        .catch(error => next(error))
-    })
-    
-    
+app.use(express.static(path.join(__dirname, 'dist')))
 
-  app.get('/api/info', (req, res) => {
-    Person.countDocuments({})
-      .then(count => {
-        res.send(`
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
+})
+
+
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then(() => response.status(204).end())
+    .catch(error => next(error))
+})
+
+
+
+app.get('/api/info', (req, res) => {
+  Person.countDocuments({})
+    .then(count => {
+      res.send(`
           <p>Phonebook has info for ${count} people</p>
           <p>${new Date()}</p>
         `)
-      })
-  })
-  
+    })
+})
 
-  
-  app.post('/api/persons', (request, response, next) => {
-    const person = new Person(request.body)
-  
-    person.save()
-      .then(savedPerson => response.json(savedPerson))
-      .catch(error => next(error))
-  })
-  
-  app.put('/api/persons/:id', (request, response, next) => {
-    const { name, number } = request.body
-  
-    Person.findById(request.params.id)
-      .then(person => {
-        if (!person) {
-          return response.status(404).end()
-        }
-  
-        person.name = name
-        person.number = number
-  
-        return person.save().then((updatedPerson) => {
-          response.json(updatedPerson)
-        })
-      })
-      .catch(error => next(error))
-  })
-  
-  app.use(errorHandler)
 
-  const PORT = process.env.PORT || 3001
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-  })
+
+app.post('/api/persons', (request, response, next) => {
+  const person = new Person(request.body)
+
+  person.save()
+    .then(savedPerson => response.json(savedPerson))
+    .catch(error => next(error))
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const { name, number } = request.body
+
+  Person.findById(request.params.id)
+    .then(person => {
+      if (!person) {
+        return response.status(404).end()
+      }
+
+      person.name = name
+      person.number = number
+
+      return person.save().then((updatedPerson) => {
+        response.json(updatedPerson)
+      })
+    })
+    .catch(error => next(error))
+})
+
+app.use(errorHandler)
+
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})

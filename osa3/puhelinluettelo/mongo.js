@@ -9,7 +9,7 @@ const password = process.argv[2]
 const name = process.argv[3]
 const number = process.argv[4]
 
-
+const encodedPassword = encodeURIComponent(password)
 
 const url = `mongodb+srv://niklasnieminen1:${encodedPassword}@cluster0.kujlfmy.mongodb.net/?appName=Cluster0`
 
