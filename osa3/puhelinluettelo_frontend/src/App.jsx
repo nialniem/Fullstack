@@ -124,14 +124,15 @@ const App = (props) => {
         setNewNumber('')
       })
       .catch(error => {
+        const errorMessage = error.response?.data?.error || 'name must be at least 3 characters long'
+      
         setNotification({
-          text: 'your message here',
-          type: 'success'
+          text: errorMessage,
+          type: 'error'
         })
-        
-        setTimeout(() => setMessage(null), 5000)
-        console.log(error)
+        setTimeout(() => setNotification(null), 5000)
       })
+      
   }
   
   
