@@ -39,6 +39,16 @@ const Person = mongoose.model('Person', personSchema)
 //utils
 morgan.token('body', (request) => JSON.stringify(request.body))
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
 ///middlewares
 app.use(cors())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -75,7 +85,7 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -84,10 +94,8 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(404).end()
       }
     })
-    .catch(error => {
-      response.status(400).json({ error: 'malformatted id' })
+    .catch(error => next(error))
     })
-})
 
   app.get('/', (req, res) => {
     res.send(`
@@ -157,7 +165,27 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(400).json({ error: error.message })
       })
   })
+
+  app.put('/api/persons/:id', (request, response, next) => {
+    const { name, number } = request.body
   
+    Person.findById(request.params.id)
+      .then(person => {
+        if (!person) {
+          return response.status(404).end()
+        }
+  
+        person.name = name
+        person.number = number
+  
+        return person.save().then((updatedPerson) => {
+          response.json(updatedPerson)
+        })
+      })
+      .catch(error => next(error))
+  })
+  
+  app.use(errorHandler)
 
   const PORT = process.env.PORT || 3001
   app.listen(PORT, () => {
