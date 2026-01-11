@@ -8,23 +8,42 @@ const cors = require('cors')
 
 const morgan = require('morgan')
 
-const password = process.argv[2]
-const url = `mongodb+srv://niklasnieminen1:${password}@cluster0.kujlfmy.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`
+
+require('dotenv').config()
+
+const url = process.env.MONGODB_URI
+
 
 mongoose.set('strictQuery', false)
 
 mongoose.connect(url, { family: 4 })
-  .then(() => {
-    console.log('connected to MongoDB')
-  })
+  .then(() => console.log('connected to MongoDB'))
   .catch((error) => {
     console.error('error connecting to MongoDB:', error.message)
+    process.exit(1)
   })
+
 
 
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name:{
+    type:String,
+    minlength: 3,
+    required: [true, 'name must be at least 3 characters long']
+
+
+  } ,
+  number: {
+    type: String,
+    minlength: 8,
+    validate: {
+      validator: function(v) {
+        return /^\d{2,3}-\d{5,}$/.test(v)
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    },
+    required: [true, 'number is required']
+  }
 })
 
 personSchema.set('toJSON', {
@@ -40,10 +59,13 @@ const Person = mongoose.model('Person', personSchema)
 morgan.token('body', (request) => JSON.stringify(request.body))
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
   if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
+    return response.status(400).json({ error: 'malformatted id' })
+  }
+
+  if (error.name === 'ValidationError') {
+    const messages = Object.values(error.errors).map(e => e.message)
+    return response.status(400).json({ error: messages[0] }) // esim "name must be at least 3 characters long"
   }
 
   next(error)
@@ -54,29 +76,6 @@ app.use(cors())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 
-
-let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456"
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "040-123456"
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "39-23-6423122"
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "12-43-234345"
-  }
-]
 
 
 app.get('/api/persons', (request, response) => {
@@ -138,12 +137,7 @@ app.get('/api/persons/:id', (request, response, next) => {
   })
   
 
-  const generateId = () => {
-    const maxId = persons.length > 0
-      ? Math.max(...persons.map(n => Number(n.id)))
-      : 0
-    return String(maxId + 1)
-  }
+ 
   
   app.post('/api/persons', (request, response) => {
     const body = request.body
