@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-if (process.argv.length < 3) {
+if (process.argv.length < 5) {
   console.log('give password as argument')
   process.exit(1)
 }
@@ -9,9 +9,9 @@ const password = process.argv[2]
 const name = process.argv[3]
 const number = process.argv[4]
 
-const encodedPassword = encodeURIComponent(password)
 
-const url = `mongodb+srv://niklasnieminen1:${encodedPassword}@cluster0.kujlfmy.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`
+
+const url = `mongodb+srv://niklasnieminen1:${encodedPassword}@cluster0.kujlfmy.mongodb.net/?appName=Cluster0`
 
 mongoose.set('strictQuery', false)
 mongoose.connect(url)

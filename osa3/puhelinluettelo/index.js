@@ -28,7 +28,7 @@ mongoose.connect(url, { family: 4 })
 const personSchema = new mongoose.Schema({
   name:{
     type:String,
-    minlength: 3,
+    minlength: [3, 'name must be at least 3 characters long'],
     required: [true, 'name must be at least 3 characters long']
 
 
@@ -115,15 +115,12 @@ app.get('/api/persons/:id', (request, response, next) => {
     })
     
 
-    app.delete('/api/persons/:id', (request, response) => {
+    app.delete('/api/persons/:id', (request, response, next) => {
       Person.findByIdAndDelete(request.params.id)
-        .then(result => {
-          response.status(204).end()
-        })
-        .catch(error => {
-          response.status(400).json({ error: 'malformatted id' })
-        })
+        .then(() => response.status(204).end())
+        .catch(error => next(error))
     })
+    
     
 
   app.get('/api/info', (req, res) => {
@@ -137,29 +134,15 @@ app.get('/api/persons/:id', (request, response, next) => {
   })
   
 
- 
   
-  app.post('/api/persons', (request, response) => {
-    const body = request.body
-  
-    if (!body.name || !body.number) {
-      return response.status(400).json({ error: 'content missing' })
-    }
-  
-    const person = new Person({
-      name: body.name,
-      number: body.number
-    })
+  app.post('/api/persons', (request, response, next) => {
+    const person = new Person(request.body)
   
     person.save()
-      .then(savedPerson => {
-        response.json(savedPerson)
-      })
-      .catch(error => {
-        response.status(400).json({ error: error.message })
-      })
+      .then(savedPerson => response.json(savedPerson))
+      .catch(error => next(error))
   })
-
+  
   app.put('/api/persons/:id', (request, response, next) => {
     const { name, number } = request.body
   
