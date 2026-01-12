@@ -10,6 +10,51 @@ describe('dummy', () => {
     assert.strictEqual(result, 1)
   })
 })
+describe('mostBlogs', () => {
+  test('of empty list is null', () => {
+    const blogs = []
+    const result = listHelper.mostBlogs(blogs)
+    assert.strictEqual(result, null)
+  })
+
+  test('returns the author with most blogs', () => {
+    const blogs = [
+      {
+        title: 'Blog 1',
+        author: 'Robert C. Martin',
+        likes: 5,
+      },
+      {
+        title: 'Blog 2',
+        author: 'Robert C. Martin',
+        likes: 3,
+      },
+      {
+        title: 'Blog 3',
+        author: 'Edsger W. Dijkstra',
+        likes: 10,
+      },
+      {
+        title: 'Blog 4',
+        author: 'Robert C. Martin',
+        likes: 1,
+      },
+      {
+        title: 'Blog 5',
+        author: 'Edsger W. Dijkstra',
+        likes: 7,
+      },
+    ]
+
+    const result = listHelper.mostBlogs(blogs)
+
+    assert.deepStrictEqual(result, {
+      author: 'Robert C. Martin',
+      blogs: 3,
+    })
+  })
+})
+
 
 describe('total likes', () => {
   test('of empty list is zero', () => {
@@ -65,4 +110,46 @@ describe('favoriteBlog', () => {
       likes: 10,
     })
   })
+  describe('mostLikes', () => {
+    test('of empty list is null', () => {
+      const blogs = []
+  
+      const result = listHelper.mostLikes(blogs)
+  
+      assert.strictEqual(result, null)
+    })
+  
+    test('returns the author whose blogs have the most likes', () => {
+      const blogs = [
+        {
+          title: 'Blog 1',
+          author: 'Edsger W. Dijkstra',
+          likes: 5,
+        },
+        {
+          title: 'Blog 2',
+          author: 'Edsger W. Dijkstra',
+          likes: 12,
+        },
+        {
+          title: 'Blog 3',
+          author: 'Robert C. Martin',
+          likes: 10,
+        },
+        {
+          title: 'Blog 4',
+          author: 'Robert C. Martin',
+          likes: 3,
+        },
+      ]
+  
+      const result = listHelper.mostLikes(blogs)
+  
+      assert.deepStrictEqual(result, {
+        author: 'Edsger W. Dijkstra',
+        likes: 17,
+      })
+    })
+  })
+  
 })
