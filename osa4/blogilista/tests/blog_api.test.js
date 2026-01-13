@@ -5,6 +5,7 @@ const app = require('../app')
 const assert = require('node:assert/strict')
 const Blog = require('../models/blog')
 
+
 const api = supertest(app)
 
 test('blogs are returned as json', async () => {
@@ -80,6 +81,35 @@ test('blogs have id field instead of _id', async () => {
   
     await api.post('/api/blogs').send(newBlog).expect(400)
   })
+  test('DELETE /api/blogs/:id succeeds with 204 and removes the blog', async () => {
+    const blogsAtStart = await Blog.find({})
+    const blogToDelete = blogsAtStart[0]
+  
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+  
+    const blogsAtEnd = await Blog.find({})
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+  })
+  test('PUT /api/blogs/:id updates likes', async () => {
+    const blogsAtStart = await Blog.find({})
+    const blogToUpdate = blogsAtStart[0]
+  
+    const updatedBlog = {
+      title: blogToUpdate.title,
+      author: blogToUpdate.author,
+      url: blogToUpdate.url,
+      likes: blogToUpdate.likes + 1,
+    }
+  
+    const res = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send(updatedBlog)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  
+    assert.strictEqual(res.body.likes, blogToUpdate.likes + 1)
+  })
+  
   
 after(async () => {
   await mongoose.connection.close()
