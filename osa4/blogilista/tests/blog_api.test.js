@@ -60,6 +60,27 @@ test('blogs have id field instead of _id', async () => {
   
     assert.strictEqual(res.body.likes, 0)
   })
+
+  test('POST /api/blogs fails with 400 if title is missing', async () => {
+    const newBlog = {
+      author: 'No title',
+      url: 'http://example.com',
+      likes: 5,
+    }
+  
+    await api.post('/api/blogs').send(newBlog).expect(400)
+  })
+  
+  test('POST /api/blogs fails with 400 if url is missing', async () => {
+    const newBlog = {
+      title: 'No url',
+      author: 'No url author',
+      likes: 5,
+    }
+  
+    await api.post('/api/blogs').send(newBlog).expect(400)
+  })
+  
 after(async () => {
   await mongoose.connection.close()
 })
