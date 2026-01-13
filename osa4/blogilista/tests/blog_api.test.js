@@ -44,6 +44,22 @@ test('blogs have id field instead of _id', async () => {
     const titles = blogsAtEnd.map(b => b.title)
     assert(titles.includes('Test blog'))
   })
+  test('if likes is missing, it defaults to 0', async () => {
+    const newBlog = {
+      title: 'Blog without likes',
+      author: 'No Likes Author',
+      url: 'http://example.com/nolikes',
+      
+    }
+  
+    const res = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+  
+    assert.strictEqual(res.body.likes, 0)
+  })
 after(async () => {
   await mongoose.connection.close()
 })
