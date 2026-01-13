@@ -1,14 +1,29 @@
-require('dotenv').config()
 const mongoose = require('mongoose')
 
-const url = process.env.MONGODB_URI
-if (!url) {
-  console.log('MONGODB_URI missing from .env')
+// // Testing
+// if (process.argv.length < 3) {
+//   console.log('give password as argument')
+//   process.exit(1)
+// }
+
+if (process.argv.length < 6) {
+  console.log('give the necessary arguments to create a new blog')
   process.exit(1)
 }
 
+const password = process.argv[2]
+const title = process.argv[3]
+const author = process.argv[4]
+const blogUrl = process.argv[5]
+const likes = Number(process.argv[6])
+
+
+const url = `mongodb+srv://niklasnieminen1:${password}@cluster0.kujlfmy.mongodb.net/phonebook?retryWrites=true&w=majority`
+
 mongoose.set('strictQuery', false)
-mongoose.connect(url)
+mongoose.connect(url, {
+  serverSelectionTimeoutMS: 1000000000,
+})
 
 const blogSchema = new mongoose.Schema({
   title: String,
@@ -19,42 +34,15 @@ const blogSchema = new mongoose.Schema({
 
 const Blog = mongoose.model('Blog', blogSchema)
 
-const usage = () => {
-  console.log('Usage:')
-  console.log('  node mongo.js                      # list blogs')
-  console.log('  node mongo.js "title" "author" "url" likes   # add blog')
-}
+const blog = new Blog({
+  title: title,
+  author: author,
+  url: blogUrl,
+  likes: likes,
+})
 
-const main = async () => {
-  if (process.argv.length === 2) {
-    const blogs = await Blog.find({})
-    blogs.forEach((b) => console.log(b))
-    return
-  }
+blog.save().then(() => {
+  console.log(`added ${title} of ${author} located in ${blogUrl} with ${likes}`)
+  mongoose.connection.close()
+})
 
-  
-  if (process.argv.length !== 6) {
-    usage()
-    return
-  }
-
-  const likes = Number(process.argv[5])
-  if (Number.isNaN(likes)) {
-    console.log('Likes must be a number. You gave:', process.argv[5])
-    return
-  }
-
-  const blog = new Blog({
-    title: process.argv[2],
-    author: process.argv[3],
-    url: process.argv[4],
-    likes,
-  })
-
-  await blog.save()
-  console.log('blog saved!')
-}
-
-main()
-  .catch((err) => console.log(err))
-  .finally(() => mongoose.connection.close())
