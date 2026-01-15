@@ -1,10 +1,7 @@
 const mongoose = require('mongoose')
+const config = require('./utils/config')
 
-// // Testing
-// if (process.argv.length < 3) {
-//   console.log('give password as argument')
-//   process.exit(1)
-// }
+mongoose.set('strictQuery', false)
 
 if (process.argv.length < 6) {
   console.log('give the necessary arguments to create a new blog')
@@ -20,10 +17,11 @@ const likes = Number(process.argv[6])
 
 const url = `mongodb+srv://niklasnieminen1:${password}@cluster0.kujlfmy.mongodb.net/phonebook?retryWrites=true&w=majority`
 
-mongoose.set('strictQuery', false)
-mongoose.connect(url, {
-  serverSelectionTimeoutMS: 1000000000,
-})
+mongoose.connect(config.MONGODB_URI)
+  .then(() => console.log('connected to MongoDB'))
+  .catch(err => {
+    console.error('error connecting to MongoDB:', err.message)
+  })
 
 const blogSchema = new mongoose.Schema({
   title: String,
