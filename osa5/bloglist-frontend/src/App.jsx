@@ -3,6 +3,7 @@ import loginService from './services/login'
 import blogService from './services/blogs'
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
+import Notification from './components/Notification'
 
 const STORAGE_KEY = 'loggedBlogappUser'
 
@@ -15,6 +16,13 @@ const App = () => {
   const [user, setUser] = useState(null)
 
   const [errorMessage, setErrorMessage] = useState(null)
+
+  const [notification, setNotification] = useState(null)
+
+  const showNotification = (text, type = 'success') => {
+    setNotification({ text, type })
+    setTimeout(() => setNotification(null), 5000)
+  }
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem(STORAGE_KEY)
@@ -36,37 +44,46 @@ const App = () => {
     event.preventDefault()
     try {
       const loggedInUser = await loginService.login({ username, password })
-
+  
       setUser(loggedInUser)
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser))
-
+  
       setUsername('')
       setPassword('')
-      setErrorMessage(null)
+  
+      showNotification(`welcome ${loggedInUser.name}`, 'success')
     } catch {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => setErrorMessage(null), 5000)
+      showNotification('wrong credentials', 'error')
     }
   }
+  
   const handleLogout = () => {
     window.localStorage.removeItem(STORAGE_KEY)
     setUser(null)
+    showNotification('logged out', 'success')
   }
   const createBlog = (blogObject) => {
+    if (!blogObject.title || !blogObject.author) {
+      showNotification('title and author are required', 'error')
+      return
+    }
+  
     const newBlog = {
       ...blogObject,
       id: String(Date.now()),
       user: { name: user.name, username: user.username },
     }
-
   
     setBlogs(prev => [newBlog, ...prev])
-
-    
+  
+    showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`, 'success')
   }
+  
   if (!user) {
     return (
       <div>
+        <Notification message={notification} />
+
         <h2>log in to application</h2>
 
         {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
@@ -95,6 +112,8 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={notification} />
+
       <h2>blogs</h2>
 
       <p>

@@ -1,10 +1,11 @@
 const login = async ({ username, password }) => {
-    // halutessasi tarkistus:
-    // if (username !== 'mluukkai' || password !== 'salainen') throw new Error('wrong credentials')
+    if (username !== 'mluukkai' || password !== 'salainen') {
+      throw new Error('wrong credentials')
+    }
   
     return {
       username,
-      name: username,
+      name: 'Matti Luukkainen',
       token: 'fake-token',
     }
   }
