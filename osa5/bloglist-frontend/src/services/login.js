@@ -1,9 +1,13 @@
-import axios from 'axios'
-const baseUrl = '/api/login'
-
-const login = async credentials => {
-  const response = await axios.post(baseUrl, credentials)
-  return response.data
-}
-
-export default { login }
+const login = async ({ username, password }) => {
+    // halutessasi tarkistus:
+    // if (username !== 'mluukkai' || password !== 'salainen') throw new Error('wrong credentials')
+  
+    return {
+      username,
+      name: username,
+      token: 'fake-token',
+    }
+  }
+  
+  export default { login }
+  
