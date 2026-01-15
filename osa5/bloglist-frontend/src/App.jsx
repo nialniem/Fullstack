@@ -59,6 +59,15 @@ const App = () => {
     showNotification('logged out', 'success')
   }
 
+  const handleLike = (blog) => {
+    const updatedBlog = {
+      ...blog,
+      likes: blog.likes + 1,
+    }
+  
+    setBlogs(blogs.map(b => (b.id === blog.id ? updatedBlog : b)))
+  }
+  
   const createBlog = (blogObject) => {
     if (!blogObject.title || !blogObject.author) {
       showNotification('title and author are required', 'error')
@@ -68,8 +77,10 @@ const App = () => {
     const newBlog = {
       ...blogObject,
       id: String(Date.now()),
+      likes: 0,
       user: { name: user.name, username: user.username },
     }
+    
 
     setBlogs(prev => [newBlog, ...prev])
     showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`, 'success')
@@ -113,8 +124,9 @@ const App = () => {
 
 
       {blogs.map(blog => (
-        <Blog key={blog.id} blog={blog} />
-      ))}
+      <Blog key={blog.id} blog={blog} handleLike={handleLike} />
+    ))}
+
     </div>
   )
 }
