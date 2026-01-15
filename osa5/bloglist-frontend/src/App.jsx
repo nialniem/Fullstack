@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import loginService from './services/login'
 import blogService from './services/blogs'
 import Blog from './components/Blog'
+import BlogForm from './components/BlogForm'
+
 const STORAGE_KEY = 'loggedBlogappUser'
 
 const App = () => {
@@ -50,7 +52,18 @@ const App = () => {
     window.localStorage.removeItem(STORAGE_KEY)
     setUser(null)
   }
+  const createBlog = (blogObject) => {
+    const newBlog = {
+      ...blogObject,
+      id: String(Date.now()),
+      user: { name: user.name, username: user.username },
+    }
 
+  
+    setBlogs(prev => [newBlog, ...prev])
+
+    
+  }
   if (!user) {
     return (
       <div>
@@ -85,9 +98,10 @@ const App = () => {
       <h2>blogs</h2>
 
       <p>
-        {user.name} logged in{' '}
-        <button onClick={handleLogout}>logout</button>
+        {user.name} logged in <button onClick={handleLogout}>logout</button>
       </p>
+
+      <BlogForm createBlog={createBlog} />
 
       {blogs.map(blog => (
         <Blog key={blog.id} blog={blog} />
