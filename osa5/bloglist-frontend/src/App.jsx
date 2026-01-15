@@ -62,11 +62,14 @@ const App = () => {
   const handleLike = (blog) => {
     const updatedBlog = {
       ...blog,
-      likes: blog.likes + 1,
+      likes: (blog.likes ?? 0) + 1,
+      user: blog.user,
     }
   
-    setBlogs(blogs.map(b => (b.id === blog.id ? updatedBlog : b)))
+    setBlogs(prev => prev.map(b => (b.id === blog.id ? updatedBlog : b)))
   }
+  
+  
   
   const createBlog = (blogObject) => {
     if (!blogObject.title || !blogObject.author) {
