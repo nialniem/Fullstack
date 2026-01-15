@@ -1,6 +1,3 @@
-import axios from 'axios'
-const baseUrl = 'http://localhost:3001/api/blogs'
-
 const getAll = async () => {
   return [
     { id: '1', title: 'Things i dont know as of 2018', author: 'Dan Abramov',url: 'https://example.com/1', likes: 7 },

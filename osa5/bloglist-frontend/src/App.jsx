@@ -65,20 +65,20 @@ const App = () => {
       likes: (blog.likes ?? 0) + 1,
       user: blog.user,
     }
-  
+
     setBlogs(prev => prev.map(b => (b.id === blog.id ? updatedBlog : b)))
   }
-  
+
   const handleDelete = (blog) => {
     const ok = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)
     if (!ok) return
-  
+
     setBlogs(prev => prev.filter(b => b.id !== blog.id))
-  
+
     showNotification(`blog ${blog.title} removed`, 'success')
   }
-  
-  
+
+
   const createBlog = (blogObject) => {
     if (!blogObject.title || !blogObject.author) {
       showNotification('title and author are required', 'error')
@@ -91,7 +91,7 @@ const App = () => {
       likes: 0,
       user: { name: user.name, username: user.username },
     }
-    
+
 
     setBlogs(prev => [newBlog, ...prev])
     showNotification(`a new blog ${newBlog.title} by ${newBlog.author} added`, 'success')
@@ -130,22 +130,22 @@ const App = () => {
       </p>
 
       <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-      <BlogForm createBlog={createBlog} />
+        <BlogForm createBlog={createBlog} />
       </Togglable>
 
 
       {[...blogs]
-      .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
-      .map(blog => (
-        <Blog
-        key={blog.id}
-        blog={blog}
-        handleLike={handleLike}
-        handleDelete={handleDelete}
-        loggedUser={user}
-      />
-      
-  ))}
+        .sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
+        .map(blog => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            handleLike={handleLike}
+            handleDelete={handleDelete}
+            loggedUser={user}
+          />
+
+        ))}
 
 
     </div>
