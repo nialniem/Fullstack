@@ -75,6 +75,7 @@ describe('Blog app', () => {
       await expect(page.getByText(/logged in/i)).toBeVisible()
     })
 
+
     test('a new blog can be created', async ({ page }) => {
       await page.getByRole('button', { name: /create new blog/i }).click()
 
@@ -139,18 +140,74 @@ describe('Blog app', () => {
       await expect(blog).toBeVisible()
 
       await blog.getByRole('button', { name: /view/i }).click()
-      await expect(blog.getByRole('button', { name: /delete|remove|poista/i })).toBeVisible()
+      await expect(blog.getByRole('button', { name: /delete/i })).toBeVisible()
 
       const user2 = await loginByApi(request, 'user2', 'password2')
       await setUserToLocalStorage(page, user2)
       await page.reload()
 
       await expect(page.getByText(/logged in/i)).toBeVisible()
-
       await expect(page.locator('.blog').first()).toBeVisible()
 
-      await expect(page.getByRole('button', { name: /delete|remove|poista/i })).toHaveCount(0)
+      await expect(page.getByRole('button', { name: /delete/i })).toHaveCount(0)
+    })
+
+    test('blogs should be organized from most likes to least likes', async ({ page }) => {
+      await expect(page.getByText(/logged in/i)).toBeVisible()
+
+      const createBlog = async (title) => {
+        const titleInput = page.locator('#title')
+      
+        // jos blogiformi ei ole näkyvissä, avaa se
+        if (!(await titleInput.isVisible())) {
+          const openFormBtn = page.getByRole('button', {
+            name: /create new blog|new blog|add blog|create blog|new|add|create/i,
+          })
+          await expect(openFormBtn).toBeVisible()
+          await openFormBtn.click()
+        }
+      
+        await expect(titleInput).toBeVisible()
+      
+        await titleInput.fill(title)
+        await page.locator('#author').fill('Tester')
+        await page.locator('#url').fill('https://example.com')
+        await page.getByRole('button', { name: /^create$/i }).click()
+      
+        await expect(page.locator('.blog').filter({ hasText: title })).toBeVisible()
+      }
+      
+    
+      await createBlog('blog-1')
+      await createBlog('blog-2')
+      await createBlog('blog-3')
+    
+      const blog1 = page.locator('.blog').filter({ hasText: 'blog-1' })
+      const blog2 = page.locator('.blog').filter({ hasText: 'blog-2' })
+      const blog3 = page.locator('.blog').filter({ hasText: 'blog-3' })
+    
+      await blog1.getByRole('button', { name: /view/i }).click()
+      await blog2.getByRole('button', { name: /view/i }).click()
+      await blog3.getByRole('button', { name: /view/i }).click()
+    
+      await blog3.getByRole('button', { name: /like/i }).click()
+      await expect(blog3.getByText(/likes\s*1/i)).toBeVisible()
+    
+      await blog3.getByRole('button', { name: /like/i }).click()
+      await expect(blog3.getByText(/likes\s*2/i)).toBeVisible()
+    
+      await blog2.getByRole('button', { name: /like/i }).click()
+      await expect(blog2.getByText(/likes\s*1/i)).toBeVisible()
+    
+      const ourBlogs = page.locator('.blog').filter({ hasText: /blog-(1|2|3)/ })
+
+      await expect(ourBlogs).toHaveCount(3)
+
+      await expect(ourBlogs.nth(0)).toContainText('blog-3')
+      await expect(ourBlogs.nth(1)).toContainText('blog-2')
+      await expect(ourBlogs.nth(2)).toContainText('blog-1')
 
     })
+    
   })
 })
