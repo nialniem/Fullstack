@@ -14,7 +14,8 @@ const App = () => {
   }
 
   const vote = (id) => {
-    dispatch({ type: 'VOTE', payload: id })
+    dispatch(voteAnecdote(id))
+
   }
 
   return (
