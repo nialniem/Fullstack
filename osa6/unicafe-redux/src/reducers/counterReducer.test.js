@@ -9,6 +9,7 @@ describe('unicafe reducer', () => {
     ok: 0,
     bad: 0
   }
+  
 
   test('should return a proper initial state when called with undefined state', () => {
     const action = {

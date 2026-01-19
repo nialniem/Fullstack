@@ -14,6 +14,10 @@ const counterReducer = (state = initialState, action) => {
       return { ...state, bad: state.bad + 1 }
     case 'ZERO':
       return initialState
+    case 'NEW_ANECDOTE': {
+        return [...state, action.payload]
+      }
+      
     default:
       return state
   }
